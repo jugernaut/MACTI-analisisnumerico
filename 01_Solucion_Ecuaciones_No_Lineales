@@ -1,0 +1,1095 @@
+{
+  "cells": [
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "view-in-github",
+        "colab_type": "text"
+      },
+      "source": [
+        "<a href=\"https://colab.research.google.com/github/jugernaut/MACTI-analisisnumerico/blob/arturo/01_Solucion_Ecuaciones_No_Lineales\" target=\"_parent\"><img src=\"https://colab.research.google.com/assets/colab-badge.svg\" alt=\"Open In Colab\"/></a>"
+      ]
+    },
+    {
+      "cell_type": "markdown",
+      "id": "1b5d0ed5-772e-42f5-8951-d9c574c5bd4f",
+      "metadata": {
+        "deletable": false,
+        "editable": false,
+        "nbgrader": {
+          "cell_type": "markdown",
+          "checksum": "dbebe43d6b7670ca7b037b06474cedd6",
+          "grade": false,
+          "grade_id": "cell-84b60fe957c30db3",
+          "locked": true,
+          "schema_version": 3,
+          "solution": false,
+          "task": false
+        },
+        "id": "1b5d0ed5-772e-42f5-8951-d9c574c5bd4f"
+      },
+      "source": [
+        "# Sistemas de ecuaciones lineales: introducción\n",
+        "\n",
+        "**Objetivo general**\n",
+        "- Plantear y resolver un problema en términos de la solución de un sistema de ecuaciones lineales.\n",
+        "\n",
+        "**Objetivos particulares**\n",
+        "- Entender como plantear un problema en términos de un sistema de ecuaciones lineales.\n",
+        "- Usar funciones de la biblioteca `numpy` para resolver el problema.\n",
+        "- Comparar varios métodos para la solución de problemas más complejos.\n",
+        "\n",
+        "## Contenido\n",
+        "- [1 - Planes de telefonía móvil.](#1)\n",
+        "    - [1.1 - Modelo matemático.](#1-1)\n",
+        "        - [Ejercicio 1 - Gráfica de rectas.](#ej-1)\n",
+        "    - [1.2 - Sistema de ecuaciones lineales.](#1-2)\n",
+        "        - [Ejercicio 2. Solución del sistema lineal.](#ej-2)\n",
+        "    - [1.3 - Forma cuadrática.](#1-3)\n",
+        "        - [Ejercicio 3. Forma cuadrática y tipos de sistemas.](#ej-3)\n",
+        "- [2 - Sistemas de ecuaciones lineales en general.](#2)\n",
+        "    - [2.1 - Métodos estacionarios para solución de sistemas lineales.](#2-1)\n",
+        "    - [2-2 - Aplicación: Transferencia de calor.](#2-2)\n",
+        "        - [Ejercicio 4. Evaluación de métodos.](#ej-4)\n",
+        "        "
+      ]
+    },
+    {
+      "cell_type": "markdown",
+      "id": "3b87eea5-b73a-454f-bb9f-103c0446b488",
+      "metadata": {
+        "deletable": false,
+        "editable": false,
+        "nbgrader": {
+          "cell_type": "markdown",
+          "checksum": "963662b815f81aa49d367fca921247d2",
+          "grade": false,
+          "grade_id": "cell-54222239890a3848",
+          "locked": true,
+          "schema_version": 3,
+          "solution": false,
+          "task": false
+        },
+        "id": "3b87eea5-b73a-454f-bb9f-103c0446b488"
+      },
+      "source": [
+        "<a name='1'></a>\n",
+        "## Planes de telefonía móvil.\n",
+        "\n",
+        "Dos compañías de telefonía compiten por ganar clientes. En la tabla que sigue se muestra el costo de la renta y el costo por Megabyte (MB) de datos de cada compañía.\n",
+        "\n",
+        "|    | Renta mensual | Costo por MB |\n",
+        "|:--:|:----: | :----------: |\n",
+        "| Compañía A  | $200$ | $0.10$       |\n",
+        "| Compañía B  | $20$  | $0.30$       |\n",
+        "\n",
+        "**¿Cómo podríamos decidir cuál de estas companías conviene contratar?**"
+      ]
+    },
+    {
+      "cell_type": "markdown",
+      "id": "683493d4-8758-4a03-a0df-a17fa798192e",
+      "metadata": {
+        "deletable": false,
+        "editable": false,
+        "nbgrader": {
+          "cell_type": "markdown",
+          "checksum": "fb79842ff2548067c5dfde4e78a7e007",
+          "grade": false,
+          "grade_id": "cell-f45ccbc89b20c7bc",
+          "locked": true,
+          "schema_version": 3,
+          "solution": false,
+          "task": false
+        },
+        "id": "683493d4-8758-4a03-a0df-a17fa798192e"
+      },
+      "source": [
+        "<a name='1-1'></a>\n",
+        "### Modelo matemático\n",
+        "- Observamos en la tabla anterior que la compañía A tiene un precio fijo de 200 pesos mensuales que es 10 veces mayor al precio que cobra la compañía B (20 pesos). \n",
+        "- Por otro lado, la compañía B cobra 0.30 pesos por cada MB, que es 3 veces mayor al precio por MB de la compañía A. \n",
+        "- El precio final mensual de cada compañía depende básicamente de cuantos MB se usen. \n",
+        "\n",
+        "Podemos escribir la forma en que cambia el precio de cada compañía en función de los MB usados:\n",
+        "\n",
+        "$\n",
+        "\\begin{array}{ccc}\n",
+        "P_A & = & 0.10 x + 200 \\tag{1}\\\\\n",
+        "P_B & = & 0.30 x + 20\n",
+        "\\end{array}\n",
+        "$\n",
+        "\n",
+        "donde $x$ representa el número de MB usados durante un mes. "
+      ]
+    },
+    {
+      "cell_type": "markdown",
+      "id": "f48c243f-cf3e-4c79-a9bf-c9211370fbde",
+      "metadata": {
+        "deletable": false,
+        "editable": false,
+        "nbgrader": {
+          "cell_type": "markdown",
+          "checksum": "337d6334b07552091c2f255454494c80",
+          "grade": false,
+          "grade_id": "cell-2977892199aab2e5",
+          "locked": true,
+          "schema_version": 3,
+          "solution": false,
+          "task": false
+        },
+        "id": "f48c243f-cf3e-4c79-a9bf-c9211370fbde"
+      },
+      "source": [
+        "---\n",
+        "<a name='ej-1'></a>\n",
+        "#### **<font color=\"DodgerBlue\">Ejercicio 1. Gráfica de rectas.</font>**\n",
+        "\n",
+        "<font color=\"DarkBlue\">En el código siguiente complete las fórmulas para cada compañía de acuerdo con las ecuaciones dadas en (1) y posteriormente ejecute el código para obtener una gráfica de cómo cambia el precio en función de los MB utilizados.</font>\n",
+        "\n",
+        "---"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "execution_count": null,
+      "id": "e63d202e-4997-4bb3-acf6-d3e77b11dfb8",
+      "metadata": {
+        "deletable": false,
+        "editable": false,
+        "nbgrader": {
+          "cell_type": "code",
+          "checksum": "3dadda0c59c109160499054c7bb61872",
+          "grade": false,
+          "grade_id": "cell-c0896d95269a4ed7",
+          "locked": true,
+          "schema_version": 3,
+          "solution": false,
+          "task": false
+        },
+        "id": "e63d202e-4997-4bb3-acf6-d3e77b11dfb8"
+      },
+      "outputs": [],
+      "source": [
+        "# Importación de las bibliotecas numpy y matplotlib\n",
+        "import numpy as np\n",
+        "import matplotlib.pyplot as plt\n",
+        "import sys, macti.visual\n",
+        "from macti.evaluacion import Evalua\n",
+        "ȩ = Evalua('SistemasLineales')\n",
+        "#ȩ = Evalua('./utils/data/', local=True)"
+      ]
+    },
+    {
+      "cell_type": "markdown",
+      "id": "217f3ece-bfce-44c4-b7a3-d524ad90c49d",
+      "metadata": {
+        "deletable": false,
+        "editable": false,
+        "nbgrader": {
+          "cell_type": "markdown",
+          "checksum": "589183e2a46d5184bb3538ed8d9eaad9",
+          "grade": false,
+          "grade_id": "cell-7136f8270adcd0f9",
+          "locked": true,
+          "schema_version": 3,
+          "solution": false,
+          "task": false
+        },
+        "id": "217f3ece-bfce-44c4-b7a3-d524ad90c49d"
+      },
+      "source": [
+        "Fórmulas a implementar:\n",
+        "$\n",
+        "\\begin{array}{ccc}\n",
+        "P_A & = & 0.10 x + 200\\\\\n",
+        "P_B & = & 0.30 x + 20\n",
+        "\\end{array}\n",
+        "$"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "execution_count": null,
+      "id": "15fe6aca-3fc9-49de-b916-61d366bb44ad",
+      "metadata": {
+        "deletable": false,
+        "nbgrader": {
+          "cell_type": "code",
+          "checksum": "218722a3dd35485f25d241480657ba6f",
+          "grade": false,
+          "grade_id": "cell-e79d1b24ab88a34b",
+          "locked": false,
+          "schema_version": 3,
+          "solution": true,
+          "task": false
+        },
+        "id": "15fe6aca-3fc9-49de-b916-61d366bb44ad"
+      },
+      "outputs": [],
+      "source": [
+        "# Megabytes desde 0 hasta 1500 (1.5 GB) en pasos de 10.\n",
+        "x = np.linspace(0,1500,10)\n",
+        "\n",
+        "# Fórmulas de cada compañía\n",
+        "# PA = ...\n",
+        "# PB = ...\n",
+        "#\n",
+        "# YOUR CODE HERE\n",
+        "raise NotImplementedError()"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "execution_count": null,
+      "id": "136fd049-24f3-4ed5-9080-10425021f504",
+      "metadata": {
+        "deletable": false,
+        "editable": false,
+        "nbgrader": {
+          "cell_type": "code",
+          "checksum": "06f4c764d99bf3eabe50dcc58e641d23",
+          "grade": false,
+          "grade_id": "cell-f375b9fd4b52db62",
+          "locked": true,
+          "schema_version": 3,
+          "solution": false,
+          "task": false
+        },
+        "id": "136fd049-24f3-4ed5-9080-10425021f504"
+      },
+      "outputs": [],
+      "source": [
+        "ȩ.verifica(PA, 1)"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "execution_count": null,
+      "id": "af31d330-b454-48eb-afd0-0a487f4d25ba",
+      "metadata": {
+        "deletable": false,
+        "editable": false,
+        "nbgrader": {
+          "cell_type": "code",
+          "checksum": "0028b33e8edaa3c64b525a514eb98e39",
+          "grade": false,
+          "grade_id": "cell-98fefa318a81b188",
+          "locked": true,
+          "schema_version": 3,
+          "solution": false,
+          "task": false
+        },
+        "id": "af31d330-b454-48eb-afd0-0a487f4d25ba"
+      },
+      "outputs": [],
+      "source": [
+        "ȩ.verifica(PB, 2)"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "execution_count": null,
+      "id": "93f450c8-c17e-41eb-9bfe-beea1e509fd5",
+      "metadata": {
+        "deletable": false,
+        "editable": false,
+        "nbgrader": {
+          "cell_type": "code",
+          "checksum": "4a26d293e0db6bd4e9d558bf8d0fbeb3",
+          "grade": false,
+          "grade_id": "cell-e3077dddbc880afe",
+          "locked": true,
+          "schema_version": 3,
+          "solution": false,
+          "task": false
+        },
+        "id": "93f450c8-c17e-41eb-9bfe-beea1e509fd5"
+      },
+      "outputs": [],
+      "source": [
+        "# Gráfica de ambos casos\n",
+        "plt.plot(x, PA, label = 'Compañía A')\n",
+        "plt.plot(x, PB, label = 'Compañía B')\n",
+        "\n",
+        "# Decoración de la gráfica\n",
+        "plt.xlabel('MB')\n",
+        "plt.ylabel('Precio final')\n",
+        "plt.legend()\n",
+        "plt.show()"
+      ]
+    },
+    {
+      "cell_type": "markdown",
+      "id": "6ebff79d-06e6-4678-bcf4-494ad6f59c28",
+      "metadata": {
+        "deletable": false,
+        "editable": false,
+        "nbgrader": {
+          "cell_type": "markdown",
+          "checksum": "dd94a55d92cba2a9f4a5e5912d1b67e2",
+          "grade": false,
+          "grade_id": "cell-2d1e99f212f5de5e",
+          "locked": true,
+          "schema_version": 3,
+          "solution": false,
+          "task": false
+        },
+        "id": "6ebff79d-06e6-4678-bcf4-494ad6f59c28"
+      },
+      "source": [
+        "**¿Qué observamos en la figura anterior?**\n",
+        "\n",
+        "Para decidir cuál de los dos compañías elegir, debemos saber cuantos MB gastamos al mes. En la figura se ve que al principio, con pocos MB usados conviene contratar a la compañía B. Pero después, si hacemos uso intenso de nuestras redes sociales, el consumo de MB aumenta y como consecuencia el precio de la compañía A es más barato.\n",
+        "\n",
+        "**¿Será posible determinar con precisión el punto de cruce de las rectas?**\n"
+      ]
+    },
+    {
+      "cell_type": "markdown",
+      "id": "c0944e5f-ce80-4c8c-a59d-33fe50a0fe71",
+      "metadata": {
+        "deletable": false,
+        "editable": false,
+        "nbgrader": {
+          "cell_type": "markdown",
+          "checksum": "b460f2518a36ac5a3a45c87801b9e18a",
+          "grade": false,
+          "grade_id": "cell-2ea68e1f98d772d9",
+          "locked": true,
+          "schema_version": 3,
+          "solution": false,
+          "task": false
+        },
+        "id": "c0944e5f-ce80-4c8c-a59d-33fe50a0fe71"
+      },
+      "source": [
+        "<a name='1-2'></a>\n",
+        "### Sistema de ecuaciones lineales.\n",
+        "\n",
+        "Las ecuaciones $(1)$ tienen la forma típica de una recta: $y = m x + b$\n",
+        "\n",
+        "Para la compañía A tenemos que $m = 0.10$ y $b = 200$, mientras que para la compañía B tenemos $m = 0.35$ y $b = 20$, entonces escribimos:\n",
+        "\n",
+        "$$\n",
+        "\\begin{array}{ccc}\n",
+        "y & = & 0.10 x + 200 \\\\\n",
+        "y & = & 0.35 x + 20\n",
+        "\\end{array}\n",
+        "$$\n",
+        "\n",
+        "Ahora, es posible escribir las ecuaciones de las líneas rectas en forma de un sistema de ecuaciones lineales como sigue:\n",
+        "\n",
+        "$$\n",
+        "\\left[\n",
+        "\\begin{array}{cc}\n",
+        "0.10 & -1 \\\\\n",
+        "0.35 & -1\n",
+        "\\end{array} \\right]\n",
+        "\\left[\n",
+        "\\begin{array}{c}\n",
+        "x \\\\\n",
+        "y\n",
+        "\\end{array} \\right] =\n",
+        "\\left[\n",
+        "\\begin{array}{c}\n",
+        "-200 \\\\ \n",
+        "-20\n",
+        "\\end{array} \\right] \\tag{2}\n",
+        "$$\n",
+        "\n",
+        "**¿Puede verificar que el sistema (2) es correcto?**\n",
+        "\n",
+        "Si resolvemos el sistema (2) entonces será posible conocer de manera precisa el cruce de las rectas."
+      ]
+    },
+    {
+      "cell_type": "markdown",
+      "id": "96f4c2f9-08a0-4646-a22b-f5b78b834e77",
+      "metadata": {
+        "deletable": false,
+        "editable": false,
+        "nbgrader": {
+          "cell_type": "markdown",
+          "checksum": "34b945d09698ebf4809cc9913abbe0df",
+          "grade": false,
+          "grade_id": "cell-cab4af23671c7b87",
+          "locked": true,
+          "schema_version": 3,
+          "solution": false,
+          "task": false
+        },
+        "id": "96f4c2f9-08a0-4646-a22b-f5b78b834e77"
+      },
+      "source": [
+        "---\n",
+        "<a name='ej-2'></a>\n",
+        "#### **<font color=\"DodgerBlue\">Ejercicio 2. Solución del sistema lineal.</font>**\n",
+        "\n",
+        "<font color=\"DarkBlue\">1. En el siguiente código, complete los datos de la matriz `A` y el vector `b` de acuerdo con el sistema (2).</font>\n",
+        "\n",
+        "---"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "execution_count": null,
+      "id": "18ba27f1-caea-4529-a589-0baa9f02599a",
+      "metadata": {
+        "deletable": false,
+        "nbgrader": {
+          "cell_type": "code",
+          "checksum": "1790caf92a93c5cf81881369c08d9fd6",
+          "grade": false,
+          "grade_id": "cell-89d7f0096147cc45",
+          "locked": false,
+          "schema_version": 3,
+          "solution": true,
+          "task": false
+        },
+        "id": "18ba27f1-caea-4529-a589-0baa9f02599a"
+      },
+      "outputs": [],
+      "source": [
+        "# Definimos la matriz A y el vector b\n",
+        "# A = np.array([[],[]])\n",
+        "# B = np.array([[]])\n",
+        "#\n",
+        "# YOUR CODE HERE\n",
+        "raise NotImplementedError()\n",
+        "\n",
+        "print(\"Matriz A : \\n\",A)\n",
+        "print(\"Vector b : \\n\", b)"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "execution_count": null,
+      "id": "6de506ad-f331-439b-8cfb-f63adad122d0",
+      "metadata": {
+        "deletable": false,
+        "editable": false,
+        "nbgrader": {
+          "cell_type": "code",
+          "checksum": "7ac500895de4327bac42f9b6445ace78",
+          "grade": false,
+          "grade_id": "cell-f4fea47760a4f378",
+          "locked": true,
+          "schema_version": 3,
+          "solution": false,
+          "task": false
+        },
+        "id": "6de506ad-f331-439b-8cfb-f63adad122d0"
+      },
+      "outputs": [],
+      "source": [
+        "# Verifica que la matriz es correcta.\n",
+        "ȩ.verifica(A,3)"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "execution_count": null,
+      "id": "d7dae2ab-9e20-4344-a13d-3375f22bd1ce",
+      "metadata": {
+        "deletable": false,
+        "editable": false,
+        "nbgrader": {
+          "cell_type": "code",
+          "checksum": "925a37cb41c5da54b1be12438e5a60da",
+          "grade": false,
+          "grade_id": "cell-19bef38db07225eb",
+          "locked": true,
+          "schema_version": 3,
+          "solution": false,
+          "task": false
+        },
+        "id": "d7dae2ab-9e20-4344-a13d-3375f22bd1ce"
+      },
+      "outputs": [],
+      "source": [
+        "# Verifica que el vector b es correcto.\n",
+        "ȩ.verifica(b,4)"
+      ]
+    },
+    {
+      "cell_type": "markdown",
+      "id": "9aa5f08a-8d9e-4bcc-9570-08dee32848bc",
+      "metadata": {
+        "deletable": false,
+        "editable": false,
+        "nbgrader": {
+          "cell_type": "markdown",
+          "checksum": "100b63a7bfc1ea54d836c5fab6aac014",
+          "grade": false,
+          "grade_id": "cell-4d8ff338dc348e8e",
+          "locked": true,
+          "schema_version": 3,
+          "solution": false,
+          "task": false
+        },
+        "id": "9aa5f08a-8d9e-4bcc-9570-08dee32848bc"
+      },
+      "source": [
+        "---\n",
+        "<font color=\"DarkBlue\">2. Investigue como usar la función <a href=\"https://numpy.org/doc/stable/reference/generated/numpy.linalg.solve.html\">numpy.linalg.solve()</a> para resolver el sistema de ecuaciones. Resuelva el sistema y guarde la solución en el vector `xsol`.</font>\n",
+        "\n",
+        "---"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "execution_count": null,
+      "id": "3a179f8b-f365-4090-ad53-8d7e202b0e9c",
+      "metadata": {
+        "deletable": false,
+        "nbgrader": {
+          "cell_type": "code",
+          "checksum": "6330ad702240c454285013d98a3b7c83",
+          "grade": false,
+          "grade_id": "cell-34a26f17f0fc4932",
+          "locked": false,
+          "schema_version": 3,
+          "solution": true,
+          "task": false
+        },
+        "id": "3a179f8b-f365-4090-ad53-8d7e202b0e9c"
+      },
+      "outputs": [],
+      "source": [
+        "# Resolvemos el sistema de ecuaciones lineal\n",
+        "# xsol = np.linalg.solve( ... )\n",
+        "#\n",
+        "# YOUR CODE HERE\n",
+        "raise NotImplementedError()\n",
+        "\n",
+        "print(\"Solución del sistema: \\n\", xsol)"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "execution_count": null,
+      "id": "2d61b733-8804-42bb-afcd-4114a2de63ea",
+      "metadata": {
+        "deletable": false,
+        "editable": false,
+        "nbgrader": {
+          "cell_type": "code",
+          "checksum": "4470cfbc1f750c8091be9d4f5cbf501d",
+          "grade": false,
+          "grade_id": "cell-e32df4584ed5f3fe",
+          "locked": true,
+          "schema_version": 3,
+          "solution": false,
+          "task": false
+        },
+        "id": "2d61b733-8804-42bb-afcd-4114a2de63ea"
+      },
+      "outputs": [],
+      "source": [
+        "# Verifica que el vector b es correcto.\n",
+        "ȩ.verifica(xsol,5)"
+      ]
+    },
+    {
+      "cell_type": "markdown",
+      "id": "8807862c-16e1-4245-95d1-bde3f6390686",
+      "metadata": {
+        "deletable": false,
+        "editable": false,
+        "nbgrader": {
+          "cell_type": "markdown",
+          "checksum": "fa9c84a3e0b68659f343bcba7081478c",
+          "grade": false,
+          "grade_id": "cell-a5bf583ca2ff7da6",
+          "locked": true,
+          "schema_version": 3,
+          "solution": false,
+          "task": false
+        },
+        "id": "8807862c-16e1-4245-95d1-bde3f6390686"
+      },
+      "source": [
+        "---\n",
+        "<font color=\"DarkBlue\">3. Verifique que la solución es correcta multiplicando la matriz `A` por el vector solución `xsol`. El resultado debería ser el vector `b`.</font> **Hint**<font color=\"Navy\">: utilice la función</font> <a href=\"https://numpy.org/doc/stable/reference/generated/numpy.dot.html\">numpy.dot()</a>.\n",
+        "\n",
+        "---"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "execution_count": null,
+      "id": "77cb588c-56fe-4470-91e2-f114fedbc678",
+      "metadata": {
+        "deletable": false,
+        "nbgrader": {
+          "cell_type": "code",
+          "checksum": "87d650f49b0b939dddfd42fe9cdcc79a",
+          "grade": false,
+          "grade_id": "cell-1dfcaf232f03ee0c",
+          "locked": false,
+          "schema_version": 3,
+          "solution": true,
+          "task": false
+        },
+        "id": "77cb588c-56fe-4470-91e2-f114fedbc678"
+      },
+      "outputs": [],
+      "source": [
+        "# Dot product\n",
+        "# rhs = np.dot( ... )\n",
+        "#\n",
+        "# YOUR CODE HERE\n",
+        "raise NotImplementedError()\n",
+        "\n",
+        "print(rhs)"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "execution_count": null,
+      "id": "f4fe233d-d68b-4f36-8a6f-abb78fb6f5d9",
+      "metadata": {
+        "deletable": false,
+        "editable": false,
+        "nbgrader": {
+          "cell_type": "code",
+          "checksum": "aae0192e03dcfdfd84f97ef093fdb922",
+          "grade": false,
+          "grade_id": "cell-4327e7efb9d97365",
+          "locked": true,
+          "schema_version": 3,
+          "solution": false,
+          "task": false
+        },
+        "id": "f4fe233d-d68b-4f36-8a6f-abb78fb6f5d9"
+      },
+      "outputs": [],
+      "source": [
+        "# Verifica que el vector b es correcto.\n",
+        "ȩ.verifica(rhs,4)"
+      ]
+    },
+    {
+      "cell_type": "markdown",
+      "id": "c7b99cc3-dd05-4444-b9f9-11a2286c376d",
+      "metadata": {
+        "deletable": false,
+        "editable": false,
+        "nbgrader": {
+          "cell_type": "markdown",
+          "checksum": "381014460c5f11ac135c18847702de84",
+          "grade": false,
+          "grade_id": "cell-e87dad408b661bee",
+          "locked": true,
+          "schema_version": 3,
+          "solution": false,
+          "task": false
+        },
+        "id": "c7b99cc3-dd05-4444-b9f9-11a2286c376d"
+      },
+      "source": [
+        "**¿Qué sucedió en la verificación del resultado de rhs?**\n",
+        "\n",
+        "**Hint**: implementa la siguiente instrucción y ve lo que sucede:\n",
+        "\n",
+        "```python\n",
+        "print('{:.30f}'.format(rhs[0][0]))\n",
+        "```"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "execution_count": null,
+      "id": "3aa8c300",
+      "metadata": {
+        "id": "3aa8c300"
+      },
+      "outputs": [],
+      "source": []
+    },
+    {
+      "cell_type": "markdown",
+      "id": "0622ef82-1b1e-45ee-bbe3-fc93bc2f5c37",
+      "metadata": {
+        "deletable": false,
+        "editable": false,
+        "nbgrader": {
+          "cell_type": "markdown",
+          "checksum": "4c38f5fbe2a57c971edd9d68afe27385",
+          "grade": false,
+          "grade_id": "cell-75dacd4eb60043a9",
+          "locked": true,
+          "schema_version": 3,
+          "solution": false,
+          "task": false
+        },
+        "id": "0622ef82-1b1e-45ee-bbe3-fc93bc2f5c37"
+      },
+      "source": [
+        "Si todo se hizo correctamente, el siguiente código debe graficar las rectas de las dos compañías y en el punto donde se cruzan"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "execution_count": null,
+      "id": "2b47bd51-0744-4840-b278-9de05c846f00",
+      "metadata": {
+        "deletable": false,
+        "editable": false,
+        "nbgrader": {
+          "cell_type": "code",
+          "checksum": "34e32cdd73847efe560eb2914b4eb730",
+          "grade": false,
+          "grade_id": "cell-28046a3c2b7bd0e2",
+          "locked": true,
+          "schema_version": 3,
+          "solution": false,
+          "task": false
+        },
+        "id": "2b47bd51-0744-4840-b278-9de05c846f00"
+      },
+      "outputs": [],
+      "source": [
+        "# Gráfica de las líneas de cada compañía\n",
+        "plt.plot(x, PA, lw=3,label = 'A')\n",
+        "plt.plot(x, PB, lw=3,label = 'B')\n",
+        "\n",
+        "# Punto de cruce de las líneas rectas\n",
+        "plt.scatter(xsol[0], xsol[1], fc = 'C3', ec ='k', s = 100, alpha=0.85, zorder=5, label='Solución')\n",
+        "\n",
+        "# Decoración de la gráfica\n",
+        "plt.xlabel('MB')\n",
+        "plt.ylabel('Precio final')\n",
+        "plt.title('Cruce de las rectas: ({:4.0f} MB, {:4.0f} pesos)'.format(xsol[0][0], xsol[1][0]))\n",
+        "plt.vlines(xsol[0][0], 0, xsol[1][0], ls='--', lw=1.0, color='gray')\n",
+        "plt.hlines(xsol[1][0], 0, xsol[0][0], ls='--', lw=1.0, color='gray')\n",
+        "\n",
+        "plt.grid(True)\n",
+        "plt.legend()\n",
+        "plt.show()"
+      ]
+    },
+    {
+      "cell_type": "markdown",
+      "id": "71b168ea",
+      "metadata": {
+        "id": "71b168ea"
+      },
+      "source": [
+        "<a name='1-3'></a>\n",
+        "### Forma cuadrática\n",
+        "\n",
+        "Denotando $A$ como la matriz del sistema, $\\mathbf{x}$ como la solución y $\\mathbf{b}$ como el lado derecho, se define la forma cuadrática de un sistema de ecuaciones lineales como sigue:\n",
+        "\n",
+        "$$ f(\\mathbf{x}) = \\dfrac{1}{2} \\mathbf{x}^T A \\mathbf{x} - \\mathbf{b}^T \\mathbf{x} + c $$\n",
+        "\n",
+        "La derivada de $f(\\mathbf{x})$ se escribe como sigue:\n",
+        "\n",
+        "$$ f^\\prime(\\mathbf{x}) = \\dfrac{1}{2} A^T \\mathbf{x} + \\dfrac{1}{2} A \\mathbf{x} - \\mathbf{b} $$\n",
+        "\n",
+        "Cuando la matriz del sistema $A$ es simétrica, es decir $A^T = A$, la derivada se reduce a:\n",
+        "\n",
+        "$$ f^\\prime(\\mathbf{x}) = A \\mathbf{x} - \\mathbf{b} $$\n",
+        "\n",
+        "Entonces, un punto crítico de $f(\\mathbf{x})$ se obtiene cuando $ f^\\prime(\\mathbf{x}) = A \\mathbf{x} - {\\mathbf{b}} = 0$ es decir cuando se cumple que\n",
+        "\n",
+        "$$A \\mathbf{x} = \\mathbf{b}$$\n",
+        "\n",
+        "Por lo tanto, **encontrar el punto crítico de la forma cuadrática** (minimizar o maximizar la función) **es equivalente a obtener la solución del sistema**, siempre y cuando la matriz $A$ del sistema sea simétrica."
+      ]
+    },
+    {
+      "cell_type": "markdown",
+      "id": "0b3ce716",
+      "metadata": {
+        "deletable": false,
+        "editable": false,
+        "nbgrader": {
+          "cell_type": "markdown",
+          "checksum": "d3970b77c41abbe4d3e4738892c1e6b6",
+          "grade": false,
+          "grade_id": "cell-4284122803334142",
+          "locked": true,
+          "schema_version": 3,
+          "solution": false,
+          "task": false
+        },
+        "id": "0b3ce716"
+      },
+      "source": [
+        "La forma cuadrática nos dice mucho acerca del sistema de ecuaciones lineales que deseamos resolver. En el caso de un sistema de $2 \\times 2$ es posible graficar $f(\\mathbf{x})$. Para entender un poco más acerca de este concepto realice el siguiente ejercicio."
+      ]
+    },
+    {
+      "cell_type": "markdown",
+      "id": "902d5b04",
+      "metadata": {
+        "deletable": false,
+        "editable": false,
+        "nbgrader": {
+          "cell_type": "markdown",
+          "checksum": "320cfa11381ff01c8cda991a3a480ad4",
+          "grade": false,
+          "grade_id": "cell-7646b62450a51a9b",
+          "locked": true,
+          "schema_version": 3,
+          "solution": false,
+          "task": false
+        },
+        "id": "902d5b04"
+      },
+      "source": [
+        "---\n",
+        "<a name='ej-3'></a>\n",
+        "#### **<font color=\"DodgerBlue\">Ejercicio 3. Forma cuadrática y tipos de sistemas.</font>**\n",
+        "<font color=\"DarkBlue\">En el siguiente interactivo seleccione del menú</font> Sistema <font color=\"DarkBlue\">todas las posibilidads y responda las siguientes preguntas.</font>\n",
+        "- <font color=\"DarkBlue\"> ¿Qué forma tiene la $f(\\mathbf{x})$ para un sistema</font>  **positivo definido**? \n",
+        "- <font color=\"DarkBlue\"> ¿Qué forma tiene la $f(\\mathbf{x})$ para un sistema</font>  **positivo indefinido**?\n",
+        "- <font color=\"DarkBlue\"> ¿Qué forma tiene la $f(\\mathbf{x})$ para un sistema</font>  **indefinido**?\n",
+        "- <font color=\"DarkBlue\"> ¿Cuál de estos sistemas cree que se pueda resolver más fácilmente? ¿Por qué?</font>\n",
+        "--- "
+      ]
+    },
+    {
+      "cell_type": "code",
+      "execution_count": null,
+      "id": "0caa0576-ad09-47fa-8b07-b0e66caa6e0e",
+      "metadata": {
+        "deletable": false,
+        "editable": false,
+        "nbgrader": {
+          "cell_type": "code",
+          "checksum": "e5267095b8816d651ff17966b3556303",
+          "grade": false,
+          "grade_id": "cell-31f793706a936726",
+          "locked": true,
+          "schema_version": 3,
+          "solution": false,
+          "task": false
+        },
+        "id": "0caa0576-ad09-47fa-8b07-b0e66caa6e0e"
+      },
+      "outputs": [],
+      "source": [
+        "%run \"../utils/src/zLinSysAnalysis_interactive.ipynb\""
+      ]
+    },
+    {
+      "cell_type": "markdown",
+      "id": "7c6a3676-f422-4f6b-ae7e-23688891adac",
+      "metadata": {
+        "deletable": false,
+        "editable": false,
+        "nbgrader": {
+          "cell_type": "markdown",
+          "checksum": "c54a12881461711c94372ffc098c8725",
+          "grade": false,
+          "grade_id": "cell-8a92af672b55c67b",
+          "locked": true,
+          "schema_version": 3,
+          "solution": false,
+          "task": false
+        },
+        "id": "7c6a3676-f422-4f6b-ae7e-23688891adac"
+      },
+      "source": [
+        "<a name='2'></a>\n",
+        "## Sistemas de ecuaciones lineales en general\n",
+        "\n",
+        "El sistema lineal (2) se puede escribir como sigue:\n",
+        "\n",
+        "$$\n",
+        "\\begin{array}{ccc}\n",
+        "a_{00} x_0 + a_{01} x_1 & = &b_0 \\\\\n",
+        "a_{01} x_0 + a_{11} x_1 & = &b_1\n",
+        "\\end{array} \\Longrightarrow\n",
+        "\\underbrace{\n",
+        "\\left[\n",
+        "\\begin{array}{cccc}\n",
+        "a_{00} & a_{01} \\\\\n",
+        "a_{01} & a_{11}\n",
+        "\\end{array} \\right]}_{A}\n",
+        "\\underbrace{\n",
+        "\\left[\n",
+        "\\begin{array}{cccc}\n",
+        "x_{0} \\\\\n",
+        "x_{1} \n",
+        "\\end{array} \\right]}_{\\mathbf{{x}}}\n",
+        "=\n",
+        "\\underbrace{\n",
+        "\\left[\n",
+        "\\begin{array}{c}\n",
+        "b_0 \\\\ b_1\n",
+        "\\end{array}\n",
+        "\\right]}_{\\mathbf{{b}}}\n",
+        "$$\n",
+        "\n",
+        "En general un sistema de ecuaciones lineales puede contener $n$ ecuaciones con $n$ incógnitas y se ve como sigue:\n",
+        "\n",
+        "$$\n",
+        "A \\cdot \\mathbf{x} = \\mathbf{b} \\Longrightarrow\n",
+        "\\left[\n",
+        "\\begin{array}{ccccc}\n",
+        "a_{00} & a_{01} & a_{02} & \\dots & a_{0n} \\\\\n",
+        "a_{10} & a_{11} & a_{12} & \\dots & a_{1n} \\\\\n",
+        "\\vdots & \\vdots & \\vdots & \\ddots & \\vdots \\\\\n",
+        "a_{n1} & a_{n1} & a_{n2} & \\dots & a_{nn}\n",
+        "\\end{array} \\right] \n",
+        "\\left[\n",
+        "\\begin{array}{cccc}\n",
+        "x_{0} \\\\ x_{1} \\\\ \\vdots \\\\ x_{n}\n",
+        "\\end{array} \\right] \n",
+        "=\n",
+        "\\left[\n",
+        "\\begin{array}{c}\n",
+        "b_0 \\\\ b_1 \\\\ \\vdots \\\\ b_{n}\n",
+        "\\end{array}\n",
+        "\\right]\n",
+        "$$ "
+      ]
+    },
+    {
+      "cell_type": "markdown",
+      "id": "cdbf0e35-107c-401e-adf9-af7680404143",
+      "metadata": {
+        "deletable": false,
+        "editable": false,
+        "nbgrader": {
+          "cell_type": "markdown",
+          "checksum": "21b760177c48d5994d28278b1e99196d",
+          "grade": false,
+          "grade_id": "cell-6dd52f8e45a6b01d",
+          "locked": true,
+          "schema_version": 3,
+          "solution": false,
+          "task": false
+        },
+        "id": "cdbf0e35-107c-401e-adf9-af7680404143"
+      },
+      "source": [
+        "<a name='2-1'></a>\n",
+        "### Métodos estacionarios para solución de sistemas lineales.\n",
+        "\n",
+        "Existen diferentes métodos de solución de los sistemas de ecuaciones lineales cada uno con ventajas y desventajas. En general se puede hablar de métodos estacionarios (Jacobi, Gauss-Seidel, SOR, etc.) y métodos no estacionarios (GGM, BICGSTAB, GMRES, etc.)."
+      ]
+    },
+    {
+      "cell_type": "markdown",
+      "id": "4a689d8c-bf9e-4934-99b9-09cc42f410d8",
+      "metadata": {
+        "deletable": false,
+        "editable": false,
+        "nbgrader": {
+          "cell_type": "markdown",
+          "checksum": "10222ec58c1b2c21fd6be2013516abc5",
+          "grade": false,
+          "grade_id": "cell-c2c4414c25f5ea37",
+          "locked": true,
+          "schema_version": 3,
+          "solution": false,
+          "task": false
+        },
+        "id": "4a689d8c-bf9e-4934-99b9-09cc42f410d8"
+      },
+      "source": [
+        "<a name='2-2'></a>\n",
+        "### Aplicación: Transferencia de calor\n",
+        "Los sistemas de ecuaciones lineales aparecen en muchas aplicaciones. Por ejemplo, para estudiar la transferencia de calor en una placa cuadrada de metal se puede resolver numéricamente una ecuación diferencial parcial. La solución numérica se encuentra resolviendo un sistema lineal como el siguiente:\n",
+        "\n",
+        "<center>\n",
+        "<img src=\"../utils/figs/calor02.png\"  width='500px'/>\n",
+        "</center>\n",
+        "    \n",
+        "Estos sistemas suelen ser muy grandes y para resolverlos se requiere de muchas operaciones numéricas, lo que implica también mucho tiempo de cómputo."
+      ]
+    },
+    {
+      "cell_type": "markdown",
+      "id": "d7d2d5fd-d61c-4000-89ae-57053c9a6eb3",
+      "metadata": {
+        "deletable": false,
+        "editable": false,
+        "nbgrader": {
+          "cell_type": "markdown",
+          "checksum": "23853be1402e9cbffd70d9aacfc38808",
+          "grade": false,
+          "grade_id": "cell-b3f040dabd67c803",
+          "locked": true,
+          "schema_version": 3,
+          "solution": false,
+          "task": false
+        },
+        "id": "d7d2d5fd-d61c-4000-89ae-57053c9a6eb3"
+      },
+      "source": [
+        "<a name='ej-4'></a>\n",
+        "#### **<font color=\"DodgerBlue\">Ejercicio 4. Evaluación de métodos.</font>**\n",
+        "<font color=\"DarkBlue\">El objetivo de este ejercicio es comparar algunos métodos estacionarios de solución de sistemas de ecuaciones lineales para resolver un problema de transferencia de calor.</font>\n",
+        "- <font color=\"DarkBlue\">En el siguiente interactivo seleccione un método y ejecute presionando `Run Interact`.</font> \n",
+        "- <font color=\"DarkBlue\">Observe el comportamiento de cada método, tome nota del tiempo de CPU, el error y el número de iteraciones. Repita cambiando el tamaño de la malla `N`.</font>\n",
+        "- <font color=\"DarkBlue\">Posteriormente responda las preguntas en el *quiz* **Evaluación de los métodos: Jacobi, Gauss-Seidel, SOR** en Moodle.</font> "
+      ]
+    },
+    {
+      "cell_type": "code",
+      "execution_count": null,
+      "id": "61c73d67-b251-4811-a39c-812bf67acc43",
+      "metadata": {
+        "deletable": false,
+        "editable": false,
+        "nbgrader": {
+          "cell_type": "code",
+          "checksum": "5aa87e3e871627d0f56f22981b28901d",
+          "grade": false,
+          "grade_id": "cell-1c7fd9de3d90f50a",
+          "locked": true,
+          "schema_version": 3,
+          "solution": false,
+          "task": false
+        },
+        "id": "61c73d67-b251-4811-a39c-812bf67acc43"
+      },
+      "outputs": [],
+      "source": [
+        "%run \"../utils/src/zCondCalor_interactive.ipynb\""
+      ]
+    },
+    {
+      "cell_type": "code",
+      "execution_count": null,
+      "id": "0800f611",
+      "metadata": {
+        "id": "0800f611"
+      },
+      "outputs": [],
+      "source": []
+    }
+  ],
+  "metadata": {
+    "kernelspec": {
+      "display_name": "Python 3 (ipykernel)",
+      "language": "python",
+      "name": "python3"
+    },
+    "language_info": {
+      "codemirror_mode": {
+        "name": "ipython",
+        "version": 3
+      },
+      "file_extension": ".py",
+      "mimetype": "text/x-python",
+      "name": "python",
+      "nbconvert_exporter": "python",
+      "pygments_lexer": "ipython3",
+      "version": "3.9.7"
+    },
+    "colab": {
+      "provenance": [],
+      "include_colab_link": true
+    }
+  },
+  "nbformat": 4,
+  "nbformat_minor": 5
+}
